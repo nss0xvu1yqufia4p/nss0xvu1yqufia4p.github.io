@@ -5,13 +5,11 @@
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>gcompute_elmo</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    span.underline{text-decoration: underline;}
-    div.column{display: inline-block; vertical-align: top; width: 50%;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
   </style>
   <style type="text/css">@font-face {
 font-family: octicons-link;
@@ -569,14 +567,14 @@ border-color: #4078c0;
 </head>
 <body>
 <h1 id="setting-up-a-machine-learning-cloud-environment-from-scratch">Setting up a machine learning cloud environment from scratch</h1>
-<p>In the last post I began to build a tensorflow classifer model. At the training stage we bagan to run into some hardware deficinecies. In this post I will go over how to set up an Ubuntu cloud instance on google compute engine and set up everything we need to build and train our model.</p>
-<p>There are several machine learning pre built images in the google compute engine Marketplace which could also be used, however I ran into issues trying to deploy some of these images due to there not being enough GPUs available in the default region or some reason or another. The pretrained ELMo model we are using from tensorflow hub also seems to not work well with tensorflow 2 so I decided to just go from scratch.</p>
+<p>In the last post I began to build a tensorflow classifier model. At the training stage we began to run into some hardware deficiencies. In this post I will go over how to set up an Ubuntu cloud instance on google compute engine and set up everything we need to build and train our model.</p>
+<p>There are several machine learning pre-built images in the google compute engine Marketplace which could also be used, however I ran into issues trying to deploy some of these images due to there not being enough GPUs available in the default region or some reason or another. The pre-trained ELMo model we are using from tensorflow hub also seems to not work well with tensorflow 2 so I decided to just go from scratch.</p>
 <h3 id="generate-an-ssh-key-pair">Generate an SSH key pair</h3>
-<p>If you dont already have an ssh key pair the first step is to generate one. We will generate an SSH key pair using RSA and 4096 bits.</p>
+<p>If you don’t already have an ssh key pair the first step is to generate one. We will generate an SSH key pair using RSA and 4096 bits.</p>
 <pre class="console"><code>ssh-keygen -t rsa -b 4096 -C &quot;username&quot;</code></pre>
 <p>Replace username with whatever you like and when prompted choose a name for your key pair. You should now have have two file my_key and my_key.pub.</p>
-<h3 id="crearting-the-instance">Crearting the instance</h3>
-<p>In the VM instances page in the coogle cloud platform console click “create”.<br />
+<h3 id="creating-the-instance">Creating the instance</h3>
+<p>In the VM instances page in the Google cloud platform console click “create”.<br />
 I then selected us-west1-b as the region/zone.<br />
 For the machine type I selected n1-standard-8, 8 vCPU cores and 30GB of RAM.<br />
 Now click on the drop down menu “CPU platform and GPU” and add a GPU, I just went with the default of a Tesla K80.<br />
@@ -585,17 +583,17 @@ Now click the “Management, security, disks, networking, sole tenancy” menu.<
 Go across to the Security tab and paste in the contents of your public key file (my.pub) You should also go across to the Disks tab and ensure “Delete boot disk when instance is deleted” is checked.<br />
 Now click create. If everything went right you should have a new instance running.</p>
 <h3 id="install-the-basics">Install the basics</h3>
-<p>Copy the external IP of the new instance eg. 123.456.789.123<br />
+<p>Copy the external IP of the new instance e.g. 123.456.789.123<br />
 Log into the new instance using your ssh key, chosen username and IP of the instance:</p>
 <pre class="console"><code>ssh -i my_key username@123.456.789.123</code></pre>
-<p>You should now have a terminal prompt to your ubuntu instance.<br />
-Now we want to install python3 pip and set up a virtual env, basically following the steps here: <a href="https://www.tensorflow.org/install/pip">https://www.tensorflow.org/install/pip</a></p>
+<p>You should now have a terminal prompt to your Ubuntu instance.<br />
+Now we want to install python3 pip and set up a virtual env, basically following the steps here: <a href="https://www.tensorflow.org/install/pip" class="uri">https://www.tensorflow.org/install/pip</a></p>
 <pre class="console"><code>sudo apt update
 sudo apt install python3-dev python3-pip python3-venv</code></pre>
 <p>Now create a virtual environment:</p>
 <pre class="console"><code>python3 -m venv --system-site-packages ./venv</code></pre>
 <p>For some reason I was getting an error: “The virtual environment was not created successfully because ensurepip is not available.”<br />
-After finding this thread <a href="https://stackoverflow.com/questions/39539110/pyvenv-not-working-because-ensurepip-is-not-available">https://stackoverflow.com/questions/39539110/pyvenv-not-working-because-ensurepip-is-not-available</a> the first solution worked. I ran:</p>
+After finding this thread <a href="https://stackoverflow.com/questions/39539110/pyvenv-not-working-because-ensurepip-is-not-available" class="uri">https://stackoverflow.com/questions/39539110/pyvenv-not-working-because-ensurepip-is-not-available</a> the first solution worked. I ran:</p>
 <pre class="console"><code>export LC_ALL=&quot;en_US.UTF-8&quot;
 export LC_CTYPE=&quot;en_US.UTF-8&quot;
 sudo dpkg-reconfigure locales</code></pre>
@@ -612,10 +610,10 @@ pip 20.1.1 from /home/user/venv/lib/python3.5/site-packages/pip (python 3.5)
 Python 3.5.2
 (venv) user@instance-1:~$ 
 </code></pre>
-<p>This shows we are running Pyhton 3 and pip is now pointing to the correct location within the virtual environment directory.<br />
+<p>This shows we are running Python 3 and pip is now pointing to the correct location within the virtual environment directory.<br />
 Next install Tensorflow GPU:</p>
 <pre class="console"><code>pip install tensorflow-gpu==1.15</code></pre>
-<p>Next we need to install CUDA, we will follow the instructions for Ubuntu 16.04 <a href="https://www.tensorflow.org/install/gpu?hl=tr">https://www.tensorflow.org/install/gpu?hl=tr</a></p>
+<p>Next we need to install CUDA, we will follow the instructions for Ubuntu 16.04 <a href="https://www.tensorflow.org/install/gpu?hl=tr" class="uri">https://www.tensorflow.org/install/gpu?hl=tr</a></p>
 <pre class="console"><code>sudo apt-get install gnupg-curl
 wget https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/cuda-repo-ubuntu1604_10.1.243-1_amd64.deb
 sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1604/x86_64/7fa2af80.pub
@@ -645,7 +643,7 @@ Now install various python libraries:</p>
 <h3 id="create-an-ssh-port-forwarding-and-run-jupyter-notebook">Create an SSH port forwarding and run Jupyter Notebook</h3>
 <p>By default when you run Jupyter Notebook it runs locally on port 8888. As we are running it on a remote server we need to be able to access it from out local machine. Rather than exposing the port publicly we will just create a tunnel via SSH to forward the port.</p>
 <pre class="console"><code>ssh -i my_key -L 8000:localhost:8888 username@123.456.789.123</code></pre>
-<p>Then run Jupyter Notebook (rememebr to run this command after activating the venv)</p>
+<p>Then run Jupyter Notebook (remember to run this command after activating the venv)</p>
 <pre class="console"><code>jupyter notebook</code></pre>
 <p>And that’s it. You should now be able to access Jupyter Notebook running on the GPU enabled cloud instance by going to localhost:8000.</p>
 <p>Don’t forget to delete the instance when you are finished, they are quite expensive.</p>
